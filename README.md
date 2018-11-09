@@ -105,13 +105,54 @@ X_train = np.reshape(X_train, (X_train.shape[0], X_train.shape[1], 1))
 - X_train.shape[0]: y_axis, X_train.shape[1]: x_axis
 X_train: np array we want to reshape\
 
+## Building the RNN
 
+### Importing the libraries
 ```python
-
+from keras.models import Sequential
+from keras.layers import Dense
+from keras.layers import LSTM
+from keras.layers import Dropout
 ```
+
+**from keras.models import Sequential**
+- The Sequential model is a linear stack of layers. You can create a Sequential model by passing a list of layer instances to the constructor
+
+**from keras.layers import Dense**
+- The model needs to know what input shape it should expect. For this reason, the first layer in a  Sequential model needs to receive information about its input shape. 
+
+**from keras.layers import LSTM**
+- Long Short-Term Memory layer 
+
+**from keras.layers import Dropout**
+- Dropout consists in randomly setting a fraction rate of input units to 0 at each update during training time, which helps prevent overfitting.
+
+
+### Initialising the RNN
 ```python
-
+regressor = Sequential()
 ```
+
+**Sequential()**
+- Sequence of layers, predicting continuous output => regressioin (not clasification)
+
+
+### Adding the first LSTM layer and some Dropout regularisation
+Add LSTM regularisation and Dropout. Dropout regularisation will allow to avoid overfitting
+```python
+regressor.add(LSTM(units = 50, return_sequences = True, input_shape = (X_train.shape[1], 1))) #add(layer)
+regressor.add(Dropout(0.2))
+```
+**regressor.add(LSTM(units = 50, return_sequences = True, input_shape = (X_train.shape[1], 1)))**
+- units: Neurons, the number of unit - the number of LSTM cells or memory units for the LSTM layers. High demensionality requires large number  of neurons to capture complex trend. 50 Neurons were used for this experiment.
+- return_sequences: True (stacked LSTM - multi-LSTM layers), False (single LSTM layer)
+- input_shape: shape of input train dataset (3D - observations, time_steps, indicators/predictors) but we only need to add (2D - time_steps, indicators/predictors) since the first element (observation) will automatically taken into account. Time_steps and indicator/predictors were used for this parameter.
+
+**regressor.add(Dropout(0.2))**
+- Dropout regularisation will allow to avoid overfitting. Argument is drop out rate. Drop 20%  of layers (10 neurons) for this experiment.
+
+
+
 ```python
 
 ```
