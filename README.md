@@ -2,7 +2,7 @@
 Using Recurrent Neural Network
 This program will predict the trend of stock price (uptrend or downward)
 
-## Data preprocessing
+## 1. Data preprocessing
 
 ### Importing the libraries
 ```python
@@ -103,9 +103,11 @@ X_train = np.reshape(X_train, (X_train.shape[0], X_train.shape[1], 1))
 
 **X_train = np.reshape(X_train, (y_axis<row/stock_prices>, x_axis<col/time_steps>, indicator_num))**
 - X_train.shape[0]: y_axis, X_train.shape[1]: x_axis
-X_train: np array we want to reshape\
+X_train: np array we want to reshape
+<br/>
 
-## Building the RNN
+---
+## 2. Building the RNN
 
 ### Importing the libraries
 ```python
