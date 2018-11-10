@@ -302,7 +302,10 @@ plt.ylabel('Google Stock Price')
 plt.legend()
 plt.show()
 ```
+<br/>
 
+
+---
 ## 4. Result
 ![Stock price prediction](https://raw.githubusercontent.com/TaegyunHa/RNN_StockPrice_Prediction/master/Google_Stock_Price_Prediction.png)
 
