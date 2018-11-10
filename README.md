@@ -258,5 +258,36 @@ inputs = sc.transform(inputs)
 - now inputs need to be scaled as the network was tained using scaled values. This time **trasnform()** will be used instead of **fit_transfor()** because object **sc** has already been fitted for the training set, so we are going to used this scale for new inputs.
 
 
+### Creating a data structure for each line of observation to predict next stock price
+To make special 3D structure expected by neural network for the training/prediction
+```python
+X_test = []
+for i in range(60, 80):
+  X_test.append(inputs[i-60:i, 0])
+X_test = np.array(X_test)
+X_test = np.reshape(X_test, (X_test.shape[0], X_test.shape[1], 1))
+predicted_stock_price = regressor.predict(X_test)
+predicted_stock_price = sc.inverse_transform(predicted_stock_price)
+```
 
+**X_test = []**
+- Create the input dataset **X_test**. Since we don't need the ground truth for training anymore, **y_test** is not needed.
+
+**for i in range(60, 80):**
+- test set contains only 20 financial days, upper bound will be 80 (60+20)
+
+**X_test.append(inputs[i-60:i, 0])**
+- the data is taken from inputs
+
+**X_test = np.array(X_test)**
+- make the new structure that have each line of observation (each stock prices of test dataset), 60 cols that 60 previous stock prices to predict next stock price
+
+**X_test = np.reshape(X_test, (X_test.shape[0], X_test.shape[1], 1))**
+- reshape the structure same as input of natwork (3D structure)
+
+**predicted_stock_price = regressor.predict(X_test)**
+- store prediction in the new variable **predicted_stock_price**
+
+**predicted_stock_price = sc.inverse_transform(predicted_stock_price)**
+- inverse normalised values to original scaled values
 
