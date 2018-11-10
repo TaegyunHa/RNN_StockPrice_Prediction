@@ -24,11 +24,52 @@ for i in range(60, 1258): # range from i-60 to i, last raws is 1257
 X_train, y_train = np.array(X_train), np.array(y_train)
 
 # Reshaping
-# RNN input shape == 3D tensor with shape (batch_size, timesteps, input_dim).
-# batch_size = total number of stock prices we have, timesteop: 60, predictor(indicator))
-# add samsung stock price for apple stock price since they are corelated
 X_train = np.reshape(X_train, (X_train.shape[0], X_train.shape[1], 1)) # 2 dimension -> 3 dimension
-# Row, cols
+
+
 # 2. Building the RNN
+from keras.models import Sequential
+from keras.layers import Dense
+from keras.layers import LSTM
+from keras.layers import Dropout
+
+# Initialising the RNN
+regressor = Sequential() # sequence of layers, predicting continuous output => regressioin (not clasification)
+
+# Adding the first LSTM layer and some Dropout regularisation
+regressor.add(LSTM(units = 50, return_sequences = True, input_shape = (X_train.shape[1], 1))) #add(layer)
+regressor.add(Dropout(0.2))
+
+# Adding a second LSTM layer and some Dropout regularisation
+regressor.add(LSTM(units = 50, return_sequences = True))
+regressor.add(Dropout(0.2))
+
+# Adding a third LSTM layer and some Dropout regularisation
+regressor.add(LSTM(units = 50, return_sequences = True))
+regressor.add(Dropout(0.2))
+
+# Adding a fourth LSTM layer and some Dropout regularisation
+regressor.add(LSTM(units = 50))
+regressor.add(Dropout(0.2))
+
+# Adding the output layer
+regressor.add(Dense(units = 1))
+
+# Compiling the RNN
+regressor.compile(optimizer = 'adam', loss = 'mean_squared_error')
+
+# Fitting the RNN to the Training set
+regressor.fit(X_train, y_train, epochs = 100, batch_size = 32)
+
 
 # 3. Making the predictions and visualising the result
+
+# Getting the real stock price of 2017
+
+# Getting the prediction stock price of 2017
+
+# Visualising the result
+
+
+
+
