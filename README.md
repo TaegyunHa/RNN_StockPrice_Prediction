@@ -199,3 +199,95 @@ Different batches going into the network, generating some errors, and the error 
 - output of training set (y_train): the ground truth
 - epochs: the number of iteration to do forward/back propagation.
 - batch_size: The network will be trained with batch_size for one train.
+
+### Training output
+```
+Epoch 1/100
+1198/1198 [==============================] - 33s 28ms/step - loss: 0.0511
+
+...
+
+Epoch 100/100
+1198/1198 [==============================] - 18s 15ms/step - loss: 0.0014
+```
+<br/>
+
+
+---
+## 3. Making the predictions and visualising the result
+
+### Getting the real stock price of 2017
+We will import ground truth to compare and visualise the realiability of trained network
+```python
+dataset_test = pd.read_csv('Google_Stock_Price_Test.csv')
+real_stock_price = dataset_test.iloc[:,1:2].values 
+```
+**dataset_test = pd.read_csv('Google_Stock_Price_Test.csv')**
+- import the stock price to test the trained network (3 Jan ~ 31 Jan)
+
+**real_stock_price = dataset_test.iloc[:,1:2].values**
+- store the values in the variable **real_stock_price**
+
+### Getting the prediction stock price of 2017
+- The network is trained to predict the stock price at time (t+1) based on 60 previous stock prices; therefore, to predict each stock prices of each financial date, the network will need 60 previous stock prices of the 60 previous financial dates before the actual day.
+- To get the 60 previous stockprice for the first prediction of test dataset, the network will need both the training set and test set. This is because the network will have 60 previous days which is from training set as well as test set. So the network will need concatnation of training set with test set
+- The important to note is that, using **the scaled training set** will occur issue since test set has not been scaled; therefore, we will concatenate the original training dataset with test dataset. 
+```python
+dataset_total = pd.concat((dataset_train['Open'], dataset_test['Open']), axis = 0)
+inputs = dataset_total[len(dataset_total) - len(dataset_test) - 60:].values
+inputs = inputs.reshape(-1, 1)
+inputs = sc.transform(inputs)
+```
+
+**dataset_total = pd.concat((dataset_train['Open'], dataset_test['Open']), axis = 0)**
+- pd.concat: Concatenate the train dataset with test dataset. 
+- First arg: couple of two dataframe we want to concatenate - since the network will need only open stock price, we need to put 'Open' for dataset
+- Second arg: axis we want to concatenate, [axis = 0: vertical axis]  [axis = 1: horizontal axis]
+
+**inputs = dataset_total[len(dataset_total) - len(dataset_test) - 60:].values**
+- we need 60 previous stock prices to predict next stock price
+- For first prediction for first financial day will need 
+  - the lower bound (the stock price from first finanacial day - 60) == [len(dataset_total) - len(dataset_test) - 60
+  - the upper bound (the stock price upto the last financial day) == :]
+- .value: convert the dataframe into values
+
+**inputs = inputs.reshape(-1, 1)**
+- (-1, 1) will be the arguments for reshaping to make the dataset as the network requires (1 col with rows)
+
+**inputs = sc.transform(inputs)**
+- now inputs need to be scaled as the network was tained using scaled values. This time **trasnform()** will be used instead of **fit_transfor()** because object **sc** has already been fitted for the training set, so we are going to used this scale for new inputs.
+
+
+### Creating a data structure for each line of observation to predict next stock price
+To make special 3D structure expected by neural network for the training/prediction
+```python
+X_test = []
+for i in range(60, 80):
+  X_test.append(inputs[i-60:i, 0])
+X_test = np.array(X_test)
+X_test = np.reshape(X_test, (X_test.shape[0], X_test.shape[1], 1))
+predicted_stock_price = regressor.predict(X_test)
+predicted_stock_price = sc.inverse_transform(predicted_stock_price)
+```
+
+**X_test = []**
+- Create the input dataset **X_test**. Since we don't need the ground truth for training anymore, **y_test** is not needed.
+
+**for i in range(60, 80):**
+- test set contains only 20 financial days, upper bound will be 80 (60+20)
+
+**X_test.append(inputs[i-60:i, 0])**
+- the data is taken from inputs
+
+**X_test = np.array(X_test)**
+- make the new structure that have each line of observation (each stock prices of test dataset), 60 cols that 60 previous stock prices to predict next stock price
+
+**X_test = np.reshape(X_test, (X_test.shape[0], X_test.shape[1], 1))**
+- reshape the structure same as input of natwork (3D structure)
+
+**predicted_stock_price = regressor.predict(X_test)**
+- store prediction in the new variable **predicted_stock_price**
+
+**predicted_stock_price = sc.inverse_transform(predicted_stock_price)**
+- inverse normalised values to original scaled values
+
